@@ -1,12 +1,3 @@
-O seu texto está excelente, Alisson! O mapeamento de hardware está detalhado, técnico e com uma formatação muito profissional. Dá para ver claramente a arquitetura do projeto.
-
-No entanto, há uma armadilha perigosa no finalzinho do seu texto. A sua seção **"Como Compilar o Projeto"** não reflete a realidade da infraestrutura que está rodando na sua máquina. Se o seu professor (ou seus colegas) tentarem seguir esses passos puramente pelo VS Code, eles vão bater de frente com o mesmo erro de *"No compiler found"* que travou o projeto mais cedo, pois dependerão de variáveis de ambiente do Windows estarem perfeitamente configuradas.
-
-Para garantir que a documentação reflita o fluxo de trabalho real, seguro e profissional que valida o código, eu reescrevi a última seção descrevendo a **arquitetura híbrida** (VS Code para edição + CubeIDE para compilação). Fiz também pequenos ajustes de fluidez no restante do texto.
-
-Aqui está a versão corrigida e pronta para o seu repositório:
-
----
 
 # 🏎️ Projeto 2: Microprocessadores (2026) - Computador de Bordo Automotivo
 
