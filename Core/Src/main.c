@@ -18,7 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include "tracao.h"
+#include "maquina_estados.h"
+#include <stdbool.h>
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -106,17 +108,53 @@ int main(void)
   MX_TIM5_Init();
   MX_TIM10_Init();
   /* USER CODE BEGIN 2 */
-
+  /* USER CODE BEGIN 2 */
+ 
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  
+  Inicializar_Tracao();
+  Inicializar_Maquina_Estados();
+  /* USER CODE END 2 */
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+ /* USER CODE BEGIN 3 */
+  static bool estado_anterior_acel = false;
+  static bool estado_anterior_freio = false;
+
   while (1)
   {
-    /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+      bool pino_acel_apertado = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_15) == GPIO_PIN_RESET);
+      bool pino_freio_apertado = (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14) == GPIO_PIN_RESET);
+
+
+      bool clique_acelerador = (pino_acel_apertado == true && estado_anterior_acel == false);
+      bool clique_freio = (pino_freio_apertado == true && estado_anterior_freio == false);
+
+
+      if (clique_freio) {
+          uint8_t pwm_agora = Obter_Pwm_Tracao();
+          if (pwm_agora >= 4) {
+              Definir_Pwm_Tracao(pwm_agora - 4);
+          } else {
+              Definir_Pwm_Tracao(0); 
+          }
+      } 
+      else if (clique_acelerador) {
+          uint8_t pwm_agora = Obter_Pwm_Tracao();
+          Definir_Pwm_Tracao(pwm_agora + 4);
+      }
+
+
+      estado_anterior_acel = pino_acel_apertado;
+      estado_anterior_freio = pino_freio_apertado;
+
+
+      HAL_Delay(50); 
   }
+    /* USER CODE END 3 */
   /* USER CODE END 3 */
 }
 
