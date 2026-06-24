@@ -18,12 +18,12 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
 #include "tracao.h"
 #include "maquina_estados.h"
 #include <stdbool.h>
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -108,18 +108,20 @@ int main(void)
   MX_TIM5_Init();
   MX_TIM10_Init();
   /* USER CODE BEGIN 2 */
-  /* USER CODE BEGIN 2 */
- 
+
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   
   Inicializar_Tracao();
   Inicializar_Maquina_Estados();
   /* USER CODE END 2 */
-  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
- /* USER CODE BEGIN 3 */
+  while (1)
+  {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
   static bool estado_anterior_acel = false;
   static bool estado_anterior_freio = false;
 
@@ -154,7 +156,6 @@ int main(void)
 
       HAL_Delay(50); 
   }
-    /* USER CODE END 3 */
   /* USER CODE END 3 */
 }
 
@@ -454,7 +455,7 @@ static void MX_TIM10_Init(void)
   htim10.Instance = TIM10;
   htim10.Init.Prescaler = 99;
   htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim10.Init.Period = 1999;
+  htim10.Init.Period = 49999;
   htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim10.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim10) != HAL_OK)
