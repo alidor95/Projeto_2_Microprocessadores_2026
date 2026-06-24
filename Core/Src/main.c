@@ -21,9 +21,12 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
 #include "tracao.h"
 #include "maquina_estados.h"
+#include "central_dados.h"   
 #include <stdbool.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -114,55 +117,23 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
-
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   
   Inicializar_Tracao();
   Inicializar_Maquina_Estados();
+
+  HAL_TIM_Base_Start_IT(&htim10); // Relógio de 50ms (Botões/Cérebro)
+  HAL_TIM_Base_Start_IT(&htim11); // Relógio de 5ms (Display)
+  HAL_TIM_Base_Start(&htim3);     // Relógio silencioso (Ultrassom)
   /* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+  /* USER CODE BEGIN 3 */
   while (1)
   {
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-  static bool estado_anterior_acel = false;
-  static bool estado_anterior_freio = false;
-
-  while (1)
-  {
-
-      bool pino_acel_apertado = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_15) == GPIO_PIN_RESET);
-      bool pino_freio_apertado = (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14) == GPIO_PIN_RESET);
-
-
-      bool clique_acelerador = (pino_acel_apertado == true && estado_anterior_acel == false);
-      bool clique_freio = (pino_freio_apertado == true && estado_anterior_freio == false);
-
-
-      if (clique_freio) {
-          uint8_t pwm_agora = Obter_Pwm_Tracao();
-          if (pwm_agora >= 4) {
-              Definir_Pwm_Tracao(pwm_agora - 4);
-          } else {
-              Definir_Pwm_Tracao(0); 
-          }
-      } 
-      else if (clique_acelerador) {
-          uint8_t pwm_agora = Obter_Pwm_Tracao();
-          Definir_Pwm_Tracao(pwm_agora + 4);
-      }
-
-
-      estado_anterior_acel = pino_acel_apertado;
-      estado_anterior_freio = pino_freio_apertado;
-
-
-      HAL_Delay(50); 
+      Atualizar_Maquina_Estados();
   }
   /* USER CODE END 3 */
+
 }
 
 /**
@@ -642,6 +613,47 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+void delay_us(uint16_t us)
+{
+    __HAL_TIM_SET_COUNTER(&htim3, 0); 
+    while (__HAL_TIM_GET_COUNTER(&htim3) < us); 
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM11) {
+        // Futura multiplexação do display de 5ms
+    }
+
+    if (htim->Instance == TIM10) {
+        tick_base++;
+        tick_seta++;
+
+        bool freio_pressionado = (HAL_GPIO_ReadPin(FREIO_GPIO_Port, FREIO_Pin) == GPIO_PIN_RESET);
+        bool acel_pressionado  = (HAL_GPIO_ReadPin(ACELERADOR_GPIO_Port, ACELERADOR_Pin) == GPIO_PIN_RESET);
+
+        if (freio_pressionado) {
+            tick_freio++;
+            tick_acelerador = 0;
+            tick_inercia = 0;
+            flags_sistema |= FLAG_FREIO_PRESSIONADO;      
+            flags_sistema &= ~FLAG_ACELERADOR_PRESSIONADO; 
+        }
+        else if (acel_pressionado) {
+            tick_acelerador++;
+            tick_freio = 0;
+            tick_inercia = 0;
+            flags_sistema |= FLAG_ACELERADOR_PRESSIONADO; 
+            flags_sistema &= ~FLAG_FREIO_PRESSIONADO;     
+        }
+        else {
+            tick_inercia++;
+            tick_freio = 0;
+            tick_acelerador = 0;
+            flags_sistema &= ~(FLAG_FREIO_PRESSIONADO | FLAG_ACELERADOR_PRESSIONADO); 
+        }
+    }
+}
 /* USER CODE END 4 */
 
 /**
