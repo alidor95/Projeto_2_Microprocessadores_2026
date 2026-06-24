@@ -46,6 +46,7 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Src/tracao.c
     Core/Src/maquina_estados.c
+    Core/Src/central_dados.c
 )
 
 # Add include paths
