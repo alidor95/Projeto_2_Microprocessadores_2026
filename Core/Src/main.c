@@ -129,7 +129,13 @@ int main(void)
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_dma_buffer, 2);    
   /* USER CODE END 2 */
 
-  /* USER CODE BEGIN 3 */
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
   while (1)
   {
     if (flag_tick_50ms)
@@ -139,7 +145,6 @@ int main(void)
       }
   }
   /* USER CODE END 3 */
-
 }
 
 /**
