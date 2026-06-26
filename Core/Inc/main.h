@@ -73,8 +73,10 @@ void Error_Handler(void);
 #define RELE_GPIO_Port GPIOA
 #define LED_TEMP_Pin GPIO_PIN_0
 #define LED_TEMP_GPIO_Port GPIOB
-#define LED_SETAS_Pin GPIO_PIN_1
-#define LED_SETAS_GPIO_Port GPIOB
+#define LED_DIREITA_Pin GPIO_PIN_1
+#define LED_DIREITA_GPIO_Port GPIOB
+#define LED_ESQUERDA_Pin GPIO_PIN_2
+#define LED_ESQUERDA_GPIO_Port GPIOB
 #define PONTO_D_Pin GPIO_PIN_10
 #define PONTO_D_GPIO_Port GPIOB
 #define SELETOR_1_Pin GPIO_PIN_12

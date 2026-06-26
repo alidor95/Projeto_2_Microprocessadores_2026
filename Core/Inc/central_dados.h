@@ -4,16 +4,23 @@
 #include "main.h"
 #include <stdint.h>
 
+// --- Bits de Estado do Sistema ---
 #define FLAG_AUTOMATICO_ATIVO           (1U << 0)
 #define FLAG_RELE_MOTOR_LIGADO          (1U << 1)
 #define FLAG_ACELERADOR_PRESSIONADO     (1U << 2)
 #define FLAG_FREIO_PRESSIONADO          (1U << 3)
-#define FLAG_ALERTA_TEMP_AMARELO        (1U << 4)
-#define FLAG_ALERTA_TEMP_CRITICO        (1U << 5)
-#define FLAG_SUPERAQUECIMENTO_CRONICO   (1U << 6)
-#define FLAG_SETA_ATIVA                 (1U << 8)
-#define FLAG_PAINEL_AUTOMATICO          (1U << 9)
-#define FLAG_OBSTACULO_DETECTADO        (1U << 12)
+#define FLAG_OBSTACULO_DETECTADO        (1U << 4)
+
+// --- Bits de Alertas e Segurança ---
+#define FLAG_ALERTA_TEMP_AMARELO        (1U << 5)
+#define FLAG_ALERTA_TEMP_CRITICO        (1U << 6)
+#define FLAG_SUPERAQUECIMENTO_CRONICO   (1U << 7)
+
+// --- Bits de Interface e Sinalização ---
+#define FLAG_SETA_DIR                   (1U << 8)
+#define FLAG_SETA_ESQ                   (1U << 9)
+#define FLAG_PAINEL_AUTOMATICO          (1U << 10)
+
 
 extern volatile uint32_t flags_sistema;
 

@@ -571,10 +571,10 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, ULTRASSON_GATE_Pin|RELE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LED_TEMP_Pin|LED_SETAS_Pin|PONTO_D_Pin|SELETOR_1_Pin
-                          |SELETOR_2_Pin|SELETOR_3_Pin|SEG_A_Pin|SEG_B_Pin
-                          |SEG_C_Pin|SEG_D_Pin|SEG_E_Pin|SEG_F_Pin
-                          |SEG_G_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, LED_TEMP_Pin|LED_DIREITA_Pin|LED_ESQUERDA_Pin|PONTO_D_Pin
+                          |SELETOR_1_Pin|SELETOR_2_Pin|SELETOR_3_Pin|SEG_A_Pin
+                          |SEG_B_Pin|SEG_C_Pin|SEG_D_Pin|SEG_E_Pin
+                          |SEG_F_Pin|SEG_G_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : LED_PILOTO_AUTO_Pin */
   GPIO_InitStruct.Pin = LED_PILOTO_AUTO_Pin;
@@ -590,14 +590,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_TEMP_Pin LED_SETAS_Pin PONTO_D_Pin SELETOR_1_Pin
-                           SELETOR_2_Pin SELETOR_3_Pin SEG_A_Pin SEG_B_Pin
-                           SEG_C_Pin SEG_D_Pin SEG_E_Pin SEG_F_Pin
-                           SEG_G_Pin */
-  GPIO_InitStruct.Pin = LED_TEMP_Pin|LED_SETAS_Pin|PONTO_D_Pin|SELETOR_1_Pin
-                          |SELETOR_2_Pin|SELETOR_3_Pin|SEG_A_Pin|SEG_B_Pin
-                          |SEG_C_Pin|SEG_D_Pin|SEG_E_Pin|SEG_F_Pin
-                          |SEG_G_Pin;
+  /*Configure GPIO pins : LED_TEMP_Pin LED_DIREITA_Pin LED_ESQUERDA_Pin PONTO_D_Pin
+                           SELETOR_1_Pin SELETOR_2_Pin SELETOR_3_Pin SEG_A_Pin
+                           SEG_B_Pin SEG_C_Pin SEG_D_Pin SEG_E_Pin
+                           SEG_F_Pin SEG_G_Pin */
+  GPIO_InitStruct.Pin = LED_TEMP_Pin|LED_DIREITA_Pin|LED_ESQUERDA_Pin|PONTO_D_Pin
+                          |SELETOR_1_Pin|SELETOR_2_Pin|SELETOR_3_Pin|SEG_A_Pin
+                          |SEG_B_Pin|SEG_C_Pin|SEG_D_Pin|SEG_E_Pin
+                          |SEG_F_Pin|SEG_G_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
