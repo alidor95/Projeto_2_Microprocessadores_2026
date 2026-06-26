@@ -9,15 +9,15 @@ void Inicializar_Tracao(void) {
     Definir_Pwm_Tracao(0); 
 }
 
-void Definir_Pwm_Tracao(uint8_t valor) {
+void Definir_Pwm_Tracao(uint8_t porcentagem) {
+    if (porcentagem > 100) porcentagem = 100;
+    pwm_porcentagem_atual = porcentagem;
     if (flags_sistema & FLAG_RELE_MOTOR_LIGADO) {
-        // Aplica o PWM no hardware
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, valor);
+        uint32_t valor_registrador = ((uint32_t)porcentagem * 3999) / 100;
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, valor_registrador);
     } else {
-        // Se o relé estiver desligado, garante PWM zero
         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
     }
-    pwm_porcentagem_atual = valor;
 }
 
 uint8_t Obter_Pwm_Tracao(void) {
