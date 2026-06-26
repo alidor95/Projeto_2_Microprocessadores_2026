@@ -1,0 +1,3 @@
+../Core/Src/tracao.c:7:6:Inicializar_Tracao	1
+../Core/Src/tracao.c:12:6:Definir_Pwm_Tracao	3
+../Core/Src/tracao.c:23:9:Obter_Pwm_Tracao	1

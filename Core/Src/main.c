@@ -22,6 +22,11 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "tracao.h"
+#include "maquina_estados.h"
+#include "central_dados.h"   
+#include <stdbool.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -112,7 +117,16 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  Inicializar_Tracao();
+  Inicializar_Maquina_Estados();
 
+  HAL_TIM_Base_Start_IT(&htim10); // Relógio 50ms
+  HAL_TIM_Base_Start_IT(&htim11); // Relógio 5ms (Display)
+  HAL_TIM_Base_Start(&htim3);     // Relógio ultrason
+
+  // Liga a esteira do DMA para ler Sensores Analógicos
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_dma_buffer, 2);    
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -122,6 +136,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    if (flag_tick_50ms)
+      {
+          flag_tick_50ms = 0; 
+          Atualizar_Maquina_Estados();
+      }
   }
   /* USER CODE END 3 */
 }
@@ -602,7 +621,86 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void delay_us(uint16_t us)
+{
+    __HAL_TIM_SET_COUNTER(&htim3, 0); 
+    while (__HAL_TIM_GET_COUNTER(&htim3) < us); 
+}
 
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
+{
+    if (hadc->Instance == ADC1) {
+        potenciometro_adc = adc_dma_buffer[0];
+        temperatura_celsius = ((int32_t)adc_dma_buffer[1] * 3300 / 4096 - 760) / 25 + 25;
+        temperatura_adc = adc_dma_buffer[1]; 
+    }
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM11) {
+        // Futura multiplexação do display de 5ms
+    }
+
+    if (htim->Instance == TIM10) {
+        tick_base++;
+        flag_tick_50ms = 1; 
+
+        uint8_t estado_agora = Obter_Estado_Atual();
+
+        // Incrementos condicionados de segurança
+        if (estado_agora == ESTADO_AQUECIMENTO) {
+            tick_aquecimento++;
+        }
+        if (estado_agora == ESTADO_EMERGENCIA) {
+            tick_emergencia++;
+        }
+
+        // Conta tempo em estado de fervura (>= 50 graus)
+        if (temperatura_celsius >= 50) { 
+            tick_temp_critica++;
+        } else {
+            tick_temp_critica = 0; 
+        }
+
+        // LÓGICA DA SETA
+        if (flags_sistema & FLAG_SETA_ATIVA) {
+            tick_seta++;
+            if (tick_seta >= 10U) { 
+                tick_seta = 0;
+                HAL_GPIO_TogglePin(LED_SETAS_GPIO_Port, LED_SETAS_Pin);
+            }
+        } else {
+            HAL_GPIO_WritePin(LED_SETAS_GPIO_Port, LED_SETAS_Pin, GPIO_PIN_RESET);
+            tick_seta = 0;
+        }
+
+        // LEITURA DOS PEDAIS
+        bool freio_pressionado = (HAL_GPIO_ReadPin(FREIO_GPIO_Port, FREIO_Pin) == GPIO_PIN_RESET);
+        bool acel_pressionado  = (HAL_GPIO_ReadPin(ACELERADOR_GPIO_Port, ACELERADOR_Pin) == GPIO_PIN_RESET);
+
+        if (freio_pressionado) {
+            tick_freio++;
+            tick_acelerador = 0;
+            tick_inercia = 0;
+            flags_sistema |= FLAG_FREIO_PRESSIONADO;      
+            flags_sistema &= ~FLAG_ACELERADOR_PRESSIONADO; 
+        }
+        else if (acel_pressionado) {
+            tick_acelerador++;
+            tick_freio = 0;
+            tick_inercia = 0;
+            flags_sistema |= FLAG_ACELERADOR_PRESSIONADO; 
+            flags_sistema &= ~FLAG_FREIO_PRESSIONADO;     
+        }
+        else {
+            tick_inercia++;
+            tick_freio = 0;
+            // tick_acelerador preservado para a FSM ler!
+            flags_sistema &= ~(FLAG_FREIO_PRESSIONADO | FLAG_ACELERADOR_PRESSIONADO); 
+        }
+    }
+}
 /* USER CODE END 4 */
 
 /**

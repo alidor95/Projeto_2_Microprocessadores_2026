@@ -1,0 +1,3 @@
+../Core/Src/maquina_estados.c:58:6:Inicializar_Maquina_Estados	1
+../Core/Src/maquina_estados.c:67:9:Obter_Estado_Atual	1
+../Core/Src/maquina_estados.c:71:6:Atualizar_Maquina_Estados	41
