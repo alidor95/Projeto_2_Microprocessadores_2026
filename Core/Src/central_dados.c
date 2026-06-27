@@ -14,11 +14,12 @@ volatile uint16_t tick_acelerador           = 0U;
 volatile uint16_t tick_freio                = 0U;
 volatile uint16_t tick_inercia              = 0U;
 volatile uint16_t tick_emergencia           = 0U;
-volatile uint16_t tick_aquecimento          = 0U;
+volatile uint16_t volante_centro_calibrado = 2048U;
 volatile uint16_t tick_temp_alta            = 0U;
 volatile uint32_t tick_temp_critica         = 0U;
 volatile uint16_t tick_seta                 = 0U;
 volatile uint8_t  flag_tick_50ms            = 0U;
+
 
 volatile uint16_t adc_dma_buffer[2]         = {0U, 0U};
 

@@ -36,11 +36,11 @@ extern volatile uint16_t tick_acelerador;
 extern volatile uint16_t tick_freio;
 extern volatile uint16_t tick_inercia;
 extern volatile uint16_t tick_emergencia;
-extern volatile uint16_t tick_aquecimento;
 extern volatile uint16_t tick_temp_alta;
 extern volatile uint32_t tick_temp_critica;
 extern volatile uint16_t tick_seta;
 extern volatile uint8_t  flag_tick_50ms;
+extern volatile uint16_t volante_centro_calibrado;
 
 extern volatile uint16_t adc_dma_buffer[2];
 

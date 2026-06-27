@@ -10,8 +10,7 @@
 #define ESTADO_ACELERANDO  2
 #define ESTADO_FREANDO     3
 #define ESTADO_AUTOMATICO  4
-#define ESTADO_AQUECIMENTO 5
-#define ESTADO_EMERGENCIA  6
+#define ESTADO_EMERGENCIA  5
 
 // Protótipos das funções
 void Inicializar_Maquina_Estados(void);

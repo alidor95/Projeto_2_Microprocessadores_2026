@@ -157,7 +157,5 @@ void Atualizar_Maquina_Estados(void) {
                 } else estado_atual = ESTADO_DESLIGADO;
             }
             break;
-            
-        case ESTADO_AQUECIMENTO: break;
     }
 }

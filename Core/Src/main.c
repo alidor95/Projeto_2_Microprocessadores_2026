@@ -621,86 +621,153 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+/* USER CODE BEGIN 4 */
+/* USER CODE BEGIN 4 */
+
 void delay_us(uint16_t us)
 {
-    __HAL_TIM_SET_COUNTER(&htim3, 0); 
-    while (__HAL_TIM_GET_COUNTER(&htim3) < us); 
+    __HAL_TIM_SET_COUNTER(&htim3, 0);
+    while (__HAL_TIM_GET_COUNTER(&htim3) < us);
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
     if (hadc->Instance == ADC1) {
-        potenciometro_adc = adc_dma_buffer[0];
+        potenciometro_adc   = adc_dma_buffer[0];
         temperatura_celsius = ((int32_t)adc_dma_buffer[1] * 3300 / 4096 - 760) / 25 + 25;
-        temperatura_adc = adc_dma_buffer[1]; 
+        temperatura_adc     = adc_dma_buffer[1];
+    }
+}
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance != TIM5) return;
+
+    static uint32_t captura_anterior = 0;
+    static uint8_t  primeira_captura = 1;
+
+    uint32_t captura_atual = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+
+    if (primeira_captura) {
+        captura_anterior = captura_atual;
+        primeira_captura = 0;
+        return;
+    }
+
+    uint32_t periodo_us = captura_atual - captura_anterior;
+    captura_anterior = captura_atual;
+
+    if (periodo_us > 0 && periodo_us < 2000000) {
+        rpm_motor      = 30000000UL / periodo_us;
+        velocidade_kmh = (uint8_t)((rpm_motor * 2UL) / 33UL);
+        if (velocidade_kmh > VELOCIDADE_MAXIMA_KMH)
+            velocidade_kmh = VELOCIDADE_MAXIMA_KMH;
+    } else {
+        rpm_motor      = 0;
+        velocidade_kmh = 0;
     }
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM11) {
-        // Futura multiplexação do display de 5ms
+        
     }
 
     if (htim->Instance == TIM10) {
         tick_base++;
-        flag_tick_50ms = 1; 
+        flag_tick_50ms = 1;
+
+ 
+        hodometro_cm += (uint32_t)(velocidade_kmh * 5UL) / 360UL;
 
         uint8_t estado_agora = Obter_Estado_Atual();
 
-        // Incrementos condicionados de segurança
-        if (estado_agora == ESTADO_AQUECIMENTO) {
-            tick_aquecimento++;
+       
+        if (flags_sistema & FLAG_SETA_ESQ) {
+            tick_seta++;
+            if (tick_seta >= 10U) {
+                tick_seta = 0;
+                HAL_GPIO_TogglePin(LED_ESQUERDA_GPIO_Port, LED_ESQUERDA_Pin);
+                HAL_GPIO_WritePin(LED_DIREITA_GPIO_Port, LED_DIREITA_Pin, GPIO_PIN_RESET);
+            }
         }
+        else if (flags_sistema & FLAG_SETA_DIR) {
+            tick_seta++;
+            if (tick_seta >= 10U) {
+                tick_seta = 0;
+                HAL_GPIO_TogglePin(LED_DIREITA_GPIO_Port, LED_DIREITA_Pin);
+                HAL_GPIO_WritePin(LED_ESQUERDA_GPIO_Port, LED_ESQUERDA_Pin, GPIO_PIN_RESET);
+            }
+        }
+        else {
+            HAL_GPIO_WritePin(LED_DIREITA_GPIO_Port,  LED_DIREITA_Pin,  GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(LED_ESQUERDA_GPIO_Port, LED_ESQUERDA_Pin, GPIO_PIN_RESET);
+            tick_seta = 0;
+        }
+
+      
+   
+        if (temperatura_celsius >= TEMP_ALERTA_CRITICO) {
+            HAL_GPIO_WritePin(LED_TEMP_GPIO_Port, LED_TEMP_Pin, GPIO_PIN_RESET); // Aceso fixo
+        } else if (temperatura_celsius >= TEMP_ALERTA_AMARELO) {
+            // Pisca a 1Hz: 10 ticks aceso, 10 ticks apagado
+            if ((tick_base % 20U) < 10U) {
+                HAL_GPIO_WritePin(LED_TEMP_GPIO_Port, LED_TEMP_Pin, GPIO_PIN_RESET); // Aceso
+            } else {
+                HAL_GPIO_WritePin(LED_TEMP_GPIO_Port, LED_TEMP_Pin, GPIO_PIN_SET);   // Apagado
+            }
+        } else {
+            HAL_GPIO_WritePin(LED_TEMP_GPIO_Port, LED_TEMP_Pin, GPIO_PIN_SET); // Apagado
+        }
+
+       
+        if (flags_sistema & FLAG_AUTOMATICO_ATIVO) {
+            HAL_GPIO_WritePin(LED_PILOTO_AUTO_GPIO_Port, LED_PILOTO_AUTO_Pin, GPIO_PIN_RESET); // Aceso
+        } else {
+            HAL_GPIO_WritePin(LED_PILOTO_AUTO_GPIO_Port, LED_PILOTO_AUTO_Pin, GPIO_PIN_SET);   // Apagado
+        }
+
+        
         if (estado_agora == ESTADO_EMERGENCIA) {
             tick_emergencia++;
         }
 
-        // Conta tempo em estado de fervura (>= 50 graus)
-        if (temperatura_celsius >= 50) { 
+        // Conta tempo com temperatura crítica (>= 50°C)
+        if (temperatura_celsius >= TEMP_ALERTA_CRITICO) {
             tick_temp_critica++;
         } else {
-            tick_temp_critica = 0; 
+            tick_temp_critica = 0;
         }
 
-        // LÓGICA DA SETA
-        if (flags_sistema & FLAG_SETA_ATIVA) {
-            tick_seta++;
-            if (tick_seta >= 10U) { 
-                tick_seta = 0;
-                HAL_GPIO_TogglePin(LED_SETAS_GPIO_Port, LED_SETAS_Pin);
-            }
-        } else {
-            HAL_GPIO_WritePin(LED_SETAS_GPIO_Port, LED_SETAS_Pin, GPIO_PIN_RESET);
-            tick_seta = 0;
-        }
-
-        // LEITURA DOS PEDAIS
+     
         bool freio_pressionado = (HAL_GPIO_ReadPin(FREIO_GPIO_Port, FREIO_Pin) == GPIO_PIN_RESET);
         bool acel_pressionado  = (HAL_GPIO_ReadPin(ACELERADOR_GPIO_Port, ACELERADOR_Pin) == GPIO_PIN_RESET);
 
         if (freio_pressionado) {
             tick_freio++;
             tick_acelerador = 0;
-            tick_inercia = 0;
-            flags_sistema |= FLAG_FREIO_PRESSIONADO;      
-            flags_sistema &= ~FLAG_ACELERADOR_PRESSIONADO; 
+            flags_sistema |=  FLAG_FREIO_PRESSIONADO;
+            flags_sistema &= ~FLAG_ACELERADOR_PRESSIONADO;
         }
         else if (acel_pressionado) {
             tick_acelerador++;
             tick_freio = 0;
-            tick_inercia = 0;
-            flags_sistema |= FLAG_ACELERADOR_PRESSIONADO; 
-            flags_sistema &= ~FLAG_FREIO_PRESSIONADO;     
+            flags_sistema |=  FLAG_ACELERADOR_PRESSIONADO;
+            flags_sistema &= ~FLAG_FREIO_PRESSIONADO;
         }
         else {
-            tick_inercia++;
+            // Inércia: só conta quando realmente no estado INÉRCIA
+            if (estado_agora == ESTADO_INERCIA) {
+                tick_inercia++;
+            }
             tick_freio = 0;
-            // tick_acelerador preservado para a FSM ler!
-            flags_sistema &= ~(FLAG_FREIO_PRESSIONADO | FLAG_ACELERADOR_PRESSIONADO); 
+            // tick_acelerador preservado para FSM detectar pulso rápido
+            flags_sistema &= ~(FLAG_FREIO_PRESSIONADO | FLAG_ACELERADOR_PRESSIONADO);
         }
     }
 }
+
 /* USER CODE END 4 */
 
 /**

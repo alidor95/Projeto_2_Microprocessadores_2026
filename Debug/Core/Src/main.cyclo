@@ -9,7 +9,8 @@
 ../Core/Src/main.c:507:13:MX_TIM11_Init	2
 ../Core/Src/main.c:536:13:MX_DMA_Init	1
 ../Core/Src/main.c:554:13:MX_GPIO_Init	1
-../Core/Src/main.c:624:6:delay_us	2
-../Core/Src/main.c:630:6:HAL_ADC_ConvCpltCallback	3
-../Core/Src/main.c:639:6:HAL_TIM_PeriodElapsedCallback	9
-../Core/Src/main.c:710:6:Error_Handler	1
+../Core/Src/main.c:627:6:delay_us	2
+../Core/Src/main.c:633:6:HAL_ADC_ConvCpltCallback	3
+../Core/Src/main.c:642:6:HAL_TIM_IC_CaptureCallback	6
+../Core/Src/main.c:671:6:HAL_TIM_PeriodElapsedCallback	15
+../Core/Src/main.c:777:6:Error_Handler	1
