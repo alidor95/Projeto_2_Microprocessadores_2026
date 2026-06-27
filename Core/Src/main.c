@@ -56,7 +56,11 @@ TIM_HandleTypeDef htim10;
 TIM_HandleTypeDef htim11;
 
 /* USER CODE BEGIN PV */
-
+// variaveis para o tacometro
+uint32_t captura_anterior = 0;
+uint32_t captura_atual = 0;
+uint32_t diferenca_tempo = 0;
+uint32_t frequencia_hz = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -621,8 +625,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-/* USER CODE BEGIN 4 */
-/* USER CODE BEGIN 4 */
 
 void delay_us(uint16_t us)
 {
@@ -767,7 +769,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         }
     }
 }
-
 /* USER CODE END 4 */
 
 /**
