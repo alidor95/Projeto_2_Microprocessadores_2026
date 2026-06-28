@@ -122,8 +122,14 @@ int main(void)
   MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-  Inicializar_Tracao();
-  Inicializar_Maquina_Estados();
+    Inicializar_Tracao();
+    Inicializar_Maquina_Estados();
+
+
+    HAL_GPIO_WritePin(GPIOB, LED_TEMP_Pin|LED_DIREITA_Pin|LED_ESQUERDA_Pin, GPIO_PIN_RESET);
+
+    HAL_GPIO_WritePin(GPIOA, RELE_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LED_PILOTO_AUTO_GPIO_Port, LED_PILOTO_AUTO_Pin, GPIO_PIN_SET);
 
   HAL_TIM_Base_Start_IT(&htim10); // Relógio 50ms
   HAL_TIM_Base_Start_IT(&htim11); // Relógio 5ms (Display)
