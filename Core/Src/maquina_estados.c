@@ -77,6 +77,7 @@ void Atualizar_Maquina_Estados(void) {
     }
     // 2. SUPERAQUECIMENTO (>50°C - Inércia forçada)
     else if (temperatura_celsius >= 50) {
+        Display_SetModo(MODO_MENSAGEM_AQU);
         if (estado_atual == ESTADO_ACELERANDO || estado_atual == ESTADO_AUTOMATICO) {
             estado_atual = ESTADO_INERCIA;
             flags_sistema &= ~FLAG_AUTOMATICO_ATIVO;
