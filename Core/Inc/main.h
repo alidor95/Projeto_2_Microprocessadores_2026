@@ -77,25 +77,26 @@ void Error_Handler(void);
 #define LED_DIREITA_GPIO_Port GPIOB
 #define LED_ESQUERDA_Pin GPIO_PIN_2
 #define LED_ESQUERDA_GPIO_Port GPIOB
-#define PONTO_D_Pin GPIO_PIN_10
-#define PONTO_D_GPIO_Port GPIOB
-#define SELETOR_1_Pin GPIO_PIN_12
-#define SELETOR_1_GPIO_Port GPIOB
-#define SELETOR_2_Pin GPIO_PIN_13
-#define SELETOR_2_GPIO_Port GPIOB
+#define PONTO_D_Pin GPIO_PIN_10 // display
+#define PONTO_D_GPIO_Port GPIOB // display  
+#define SELETOR_1_Pin GPIO_PIN_12 // display
+#define SELETOR_1_GPIO_Port GPIOB // display
+#define SELETOR_2_Pin GPIO_PIN_13 // display
+#define SELETOR_2_GPIO_Port GPIOB // display
 #define FREIO_Pin GPIO_PIN_14
 #define FREIO_GPIO_Port GPIOB
-#define SELETOR_3_Pin GPIO_PIN_15
-#define SELETOR_3_GPIO_Port GPIOB
+#define SELETOR_3_Pin GPIO_PIN_15 // display
+#define SELETOR_3_GPIO_Port GPIOB // display 
 #define MOTOR_PWM_Pin GPIO_PIN_8
 #define MOTOR_PWM_GPIO_Port GPIOA
-#define FUNCAO_Pin GPIO_PIN_9
-#define FUNCAO_GPIO_Port GPIOA
-#define SELECIONA_Pin GPIO_PIN_10
-#define SELECIONA_GPIO_Port GPIOA
+#define FUNCAO_Pin GPIO_PIN_9 // troca função
+#define FUNCAO_GPIO_Port GPIOA // troca função  
+#define SELECIONA_Pin GPIO_PIN_10 // seleciona 
+#define SELECIONA_GPIO_Port GPIOA // seleciona 
 #define ACELERADOR_Pin GPIO_PIN_15
 #define ACELERADOR_GPIO_Port GPIOA
-#define SEG_A_Pin GPIO_PIN_3
+// daqui para a baixo é os displays
+#define SEG_A_Pin GPIO_PIN_3  
 #define SEG_A_GPIO_Port GPIOB
 #define SEG_B_Pin GPIO_PIN_4
 #define SEG_B_GPIO_Port GPIOB
