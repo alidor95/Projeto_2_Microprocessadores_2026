@@ -23,6 +23,7 @@
 
 
 extern volatile uint32_t flags_sistema;
+extern volatile uint8_t marcha_atual; // Valores de 1 a 5
 
 extern volatile uint16_t rpm_motor;
 extern volatile uint8_t  velocidade_kmh;

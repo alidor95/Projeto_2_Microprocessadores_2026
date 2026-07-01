@@ -2,6 +2,8 @@
 
 volatile uint32_t flags_sistema             = 0U;
 
+volatile uint8_t marcha_atual = 1;
+
 volatile uint16_t rpm_motor                 = 0U;
 volatile uint8_t  velocidade_kmh            = 0U;
 volatile uint32_t hodometro_cm              = 0U;

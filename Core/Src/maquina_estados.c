@@ -64,7 +64,16 @@ void Inicializar_Maquina_Estados(void) {
 
 uint8_t Obter_Estado_Atual(void) { return estado_atual; }
 
+void Atualizar_Marcha(void) {
+    if (rpm_motor < 1000) marcha_atual = 1;
+    else if (rpm_motor < 1500) marcha_atual = 2;
+    else if (rpm_motor < 2000) marcha_atual = 3;
+    else if (rpm_motor < 2500) marcha_atual = 4;
+    else marcha_atual = 5;
+}
+
 void Atualizar_Maquina_Estados(void) {
+    Atualizar_Marcha();
     uint8_t pwm_agora = Obter_Pwm_Tracao();
 
     // 1. EMERGÊNCIA (Apenas no modo automático)
