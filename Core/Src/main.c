@@ -678,19 +678,56 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
+    // A cada 5ms: Atualiza o Display (Multiplexação)
     if (htim->Instance == TIM11) {
+        Display_Atualizar();
     }
 
+    // A cada 50ms: Lógica de controle, FSM e Sensores
     if (htim->Instance == TIM10) {
         tick_base++;
         flag_tick_50ms = 1;
 
- 
+        // Lógica para alternar o modo com o botão Função (com debounce)
+        static uint8_t botao_pressionado = 0;
+        if (HAL_GPIO_ReadPin(FUNCAO_GPIO_Port, FUNCAO_Pin) == GPIO_PIN_RESET) {
+            if (botao_pressionado == 0) {
+                display_modo_atual++;
+                if (display_modo_atual > DISPLAY_MODO_TEMPERATURA) {
+                    display_modo_atual = DISPLAY_MODO_VELOCIDADE;
+                }
+                botao_pressionado = 1;
+            }
+        } else {
+            botao_pressionado = 0;
+        }
+
+        // Lógica para enviar o dado correto ao driver
+        switch(display_modo_atual) {
+            case DISPLAY_MODO_VELOCIDADE:
+                Display_SetModo(MODO_NUMERICO);
+                Display_SetValor(velocidade_kmh);
+                break;
+            case DISPLAY_MODO_RPM:
+                Display_SetModo(MODO_NUMERICO);
+                Display_SetValor(rpm_motor / 3);
+                break;
+            case DISPLAY_MODO_ODOMETRO:
+                Display_SetModo(MODO_NUMERICO);
+                Display_SetValor((uint16_t)(hodometro_cm / 100));
+                break;
+            case DISPLAY_MODO_TEMPERATURA:
+                Display_SetModo(MODO_NUMERICO);
+                Display_SetValor((uint16_t)temperatura_celsius);
+                break;
+        }
+
+        // Cálculo do hodômetro
         hodometro_cm += (uint32_t)(velocidade_kmh * 5UL) / 360UL;
 
         uint8_t estado_agora = Obter_Estado_Atual();
 
-       
+        // Lógica de Seta (Direção)
         if (flags_sistema & FLAG_SETA_ESQ) {
             tick_seta++;
             if (tick_seta >= 10U) {
@@ -713,41 +750,37 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
             tick_seta = 0;
         }
 
-      
-   
+        // Alerta de Temperatura
         if (temperatura_celsius >= TEMP_ALERTA_CRITICO) {
-            HAL_GPIO_WritePin(LED_TEMP_GPIO_Port, LED_TEMP_Pin, GPIO_PIN_RESET); // Aceso fixo
+            HAL_GPIO_WritePin(LED_TEMP_GPIO_Port, LED_TEMP_Pin, GPIO_PIN_RESET);
         } else if (temperatura_celsius >= TEMP_ALERTA_AMARELO) {
-            // Pisca a 1Hz: 10 ticks aceso, 10 ticks apagado
             if ((tick_base % 20U) < 10U) {
-                HAL_GPIO_WritePin(LED_TEMP_GPIO_Port, LED_TEMP_Pin, GPIO_PIN_RESET); // Aceso
+                HAL_GPIO_WritePin(LED_TEMP_GPIO_Port, LED_TEMP_Pin, GPIO_PIN_RESET);
             } else {
-                HAL_GPIO_WritePin(LED_TEMP_GPIO_Port, LED_TEMP_Pin, GPIO_PIN_SET);   // Apagado
+                HAL_GPIO_WritePin(LED_TEMP_GPIO_Port, LED_TEMP_Pin, GPIO_PIN_SET);
             }
         } else {
-            HAL_GPIO_WritePin(LED_TEMP_GPIO_Port, LED_TEMP_Pin, GPIO_PIN_SET); // Apagado
+            HAL_GPIO_WritePin(LED_TEMP_GPIO_Port, LED_TEMP_Pin, GPIO_PIN_SET);
         }
 
-       
+        // Piloto Automático
         if (flags_sistema & FLAG_AUTOMATICO_ATIVO) {
-            HAL_GPIO_WritePin(LED_PILOTO_AUTO_GPIO_Port, LED_PILOTO_AUTO_Pin, GPIO_PIN_RESET); // Aceso
+            HAL_GPIO_WritePin(LED_PILOTO_AUTO_GPIO_Port, LED_PILOTO_AUTO_Pin, GPIO_PIN_RESET);
         } else {
-            HAL_GPIO_WritePin(LED_PILOTO_AUTO_GPIO_Port, LED_PILOTO_AUTO_Pin, GPIO_PIN_SET);   // Apagado
+            HAL_GPIO_WritePin(LED_PILOTO_AUTO_GPIO_Port, LED_PILOTO_AUTO_Pin, GPIO_PIN_SET);
         }
 
-        
         if (estado_agora == ESTADO_EMERGENCIA) {
             tick_emergencia++;
         }
 
-        // Conta tempo com temperatura crítica (>= 50°C)
         if (temperatura_celsius >= TEMP_ALERTA_CRITICO) {
             tick_temp_critica++;
         } else {
             tick_temp_critica = 0;
         }
 
-     
+        // Leitura de Pedais
         bool freio_pressionado = (HAL_GPIO_ReadPin(FREIO_GPIO_Port, FREIO_Pin) == GPIO_PIN_RESET);
         bool acel_pressionado  = (HAL_GPIO_ReadPin(ACELERADOR_GPIO_Port, ACELERADOR_Pin) == GPIO_PIN_RESET);
 
@@ -764,12 +797,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
             flags_sistema &= ~FLAG_FREIO_PRESSIONADO;
         }
         else {
-            // Inércia: só conta quando realmente no estado INÉRCIA
             if (estado_agora == ESTADO_INERCIA) {
                 tick_inercia++;
             }
             tick_freio = 0;
-            // tick_acelerador preservado para FSM detectar pulso rápido
             flags_sistema &= ~(FLAG_FREIO_PRESSIONADO | FLAG_ACELERADOR_PRESSIONADO);
         }
     }
