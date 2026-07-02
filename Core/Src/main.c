@@ -723,7 +723,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         }
 
         // Cálculo do hodômetro
-        hodometro_cm += (uint32_t)(velocidade_kmh * 5UL) / 360UL;
+        //hodometro_cm += (uint32_t)(velocidade_kmh * 5UL) / 360UL;
+        hodometro_cm += ((uint32_t)velocidade_kmh * 100000UL) /72000UL; // calculo do hodometro v2
 
         uint8_t estado_agora = Obter_Estado_Atual();
 

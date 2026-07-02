@@ -72,8 +72,84 @@ void Atualizar_Marcha(void) {
     else marcha_atual = 5;
 }
 
+void Atualizar_Volante(void)
+{
+    switch (movimento_volante)
+    {
+        case VOLANTE_PARADO:
+
+            if (potenciometro_adc > (VOLANTE_CENTRO + VOLANTE_ZONA_MORTA))
+            {
+                movimento_volante = VOLANTE_DIREITA;
+                tick_volante = 0;
+            }
+            else if (potenciometro_adc < (VOLANTE_CENTRO - VOLANTE_ZONA_MORTA))
+            {
+                movimento_volante = VOLANTE_ESQUERDA;
+                tick_volante = 0;
+            }
+
+            break;
+
+        case VOLANTE_DIREITA:
+
+            tick_volante++;
+
+            /* Voltou para o centro */
+            if ((potenciometro_adc >= (VOLANTE_CENTRO - VOLANTE_ZONA_MORTA)) &&
+                (potenciometro_adc <= (VOLANTE_CENTRO + VOLANTE_ZONA_MORTA)))
+            {
+                if (tick_volante <= TICKS_PULSO_RAPIDO_MAX)
+                {
+                    /* Liga/desliga seta direita */
+                    flags_sistema ^= FLAG_SETA_DIR;
+
+                    /* Garante que a outra seta fique desligada */
+                    flags_sistema &= ~FLAG_SETA_ESQ;
+                }
+
+                movimento_volante = VOLANTE_PARADO;
+            }
+            else if (tick_volante > TICKS_PULSO_RAPIDO_MAX)
+            {
+                /* Demorou demais, descarta o movimento */
+                movimento_volante = VOLANTE_PARADO;
+            }
+
+            break;
+
+        case VOLANTE_ESQUERDA:
+
+            tick_volante++;
+
+            /* Voltou para o centro */
+            if ((potenciometro_adc >= (VOLANTE_CENTRO - VOLANTE_ZONA_MORTA)) &&
+                (potenciometro_adc <= (VOLANTE_CENTRO + VOLANTE_ZONA_MORTA)))
+            {
+                if (tick_volante <= TICKS_PULSO_RAPIDO_MAX)
+                {
+                    /* Liga/desliga seta esquerda */
+                    flags_sistema ^= FLAG_SETA_ESQ;
+
+                    /* Garante que a outra seta fique desligada */
+                    flags_sistema &= ~FLAG_SETA_DIR;
+                }
+
+                movimento_volante = VOLANTE_PARADO;
+            }
+            else if (tick_volante > TICKS_PULSO_RAPIDO_MAX)
+            {
+                /* Demorou demais, descarta o movimento */
+                movimento_volante = VOLANTE_PARADO;
+            }
+
+            break;
+    }
+}
+
 void Atualizar_Maquina_Estados(void) {
     Atualizar_Marcha();
+    Atualizar_Volante();
     uint8_t pwm_agora = Obter_Pwm_Tracao();
 
     // 1. EMERGÊNCIA (Apenas no modo automático)

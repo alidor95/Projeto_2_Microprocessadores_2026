@@ -22,6 +22,16 @@
 #define FLAG_PAINEL_AUTOMATICO          (1U << 10)
 
 
+typedef enum
+{
+    VOLANTE_PARADO = 0,
+    VOLANTE_DIREITA,
+    VOLANTE_ESQUERDA
+} movimento_volante_t;
+
+extern movimento_volante_t movimento_volante;
+extern uint8_t tick_volante;
+
 extern volatile uint32_t flags_sistema;
 extern volatile uint8_t marcha_atual; // Valores de 1 a 5
 
